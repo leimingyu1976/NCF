@@ -1,22 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Senparc.AI.Kernel;
 using Senparc.Areas.Admin.Domain;
-using Senparc.CO2NET.Cache;
+using Senparc.CO2NET.Trace;
 using Senparc.Ncf.Core.Config;
-using Senparc.Ncf.Core.Exceptions;
 using Senparc.Ncf.Core.Models;
-using Senparc.Ncf.Core.Models.DataBaseModel;
 using Senparc.Ncf.Core.MultiTenant;
-using Senparc.Ncf.Service;
-using Senparc.Ncf.XncfBase;
+using Senparc.Xncf.Installer.Domain.Dto;
 using Senparc.Xncf.Installer.OHS.Local.AppService;
-using Senparc.Xncf.SystemManager.Domain.Service;
 using Senparc.Xncf.Tenant.Domain.DataBaseModel;
-using Senparc.Xncf.Tenant.Domain.Services;
-using Senparc.Xncf.XncfModuleManager.Domain.Services;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Senparc.Xncf.Instraller.Pages
@@ -29,6 +22,10 @@ namespace Senparc.Xncf.Instraller.Pages
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
+        /// 系统名称
+        /// </summary>
+        public string SystemName { get; set; }
+        /// <summary>
         /// 管理员用户名
         /// </summary>
         public string AdminUserName { get; set; }
@@ -36,6 +33,10 @@ namespace Senparc.Xncf.Instraller.Pages
         /// 管理员密码
         /// </summary>
         public string AdminPassword { get; set; }
+        /// <summary>
+        /// 数据库连接字符串
+        /// </summary>
+        public string DbConnectionString { get; set; }
         /// <summary>
         /// 需要修改的命名空间
         /// </summary>
@@ -56,15 +57,13 @@ namespace Senparc.Xncf.Instraller.Pages
         public IndexModel(IServiceProvider serviceProvider, AdminUserInfoService accountService,
             InstallAppService installAppService)
         {
+            _serviceProvider = serviceProvider;
             _accountInfoService = accountService;
             this._installAppService = installAppService;
-            _serviceProvider = serviceProvider;
 
             MultiTenantEnable = SiteConfig.SenparcCoreSetting.EnableMultiTenant;
             TenantRule = SiteConfig.SenparcCoreSetting.TenantRule;
         }
-
-
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -98,17 +97,26 @@ namespace Senparc.Xncf.Instraller.Pages
             {
                 Console.WriteLine("开始初始化");
 
+                //初始化页面显示的配置项的默认值
+                var result = await _installAppService.GetInstallOptionsAsync();
+                SystemName = result.Data.SystemName;
+                AdminUserName = result.Data.AdminUserName;
+                DbConnectionString = result.Data.DbConnectionString;
 
                 return Page();
             }
 
             //base.Response.StatusCode = 404;
+
+            SenparcTrace.SendCustomLog("风险提示", "Install 被访问，已返回 404 进行混淆。如果您已经确保完成项目初始化，建议移除 Senparc.Xncf.Install 模块");
+
             return new StatusCodeResult(404);//已经安装完毕，且存在管理员则不进行安装
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync([FromBody] InstallRequestDto installRequestDto)
         {
-            var result = await _installAppService.InstallAsyunc();
+            //开始安装
+            var result = await _installAppService.InstallAsync(installRequestDto);
             if (result.Success != true)
             {
                 if (result.Data == null)
@@ -131,6 +139,11 @@ namespace Senparc.Xncf.Instraller.Pages
                 TenantInfoDto = tenantReulst.Data;
             }
             return Page();
+        }
+
+        public IActionResult OnGetDefaultOptions()
+        {
+            return new JsonResult(_installAppService.GetInstallOptionsAsync());
         }
     }
 }

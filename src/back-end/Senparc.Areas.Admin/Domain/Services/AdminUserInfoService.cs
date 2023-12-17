@@ -1,28 +1,22 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using Senparc.Ncf.Core.Config;
-using Senparc.Ncf.Core.Extensions;
-using Senparc.Ncf.Core.Models;
-using Senparc.Ncf.Core.Utility;
-using Senparc.Ncf.Log;
-using Senparc.Ncf.Repository;
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using Senparc.CO2NET;
 using Microsoft.EntityFrameworkCore;
-using Senparc.Ncf.Service;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Senparc.Areas.Admin.ACL;
 using Senparc.Areas.Admin.Domain.Models;
 using Senparc.Areas.Admin.Domain.Models.Dto;
+using Senparc.Ncf.Core.Config;
+using Senparc.Ncf.Core.Models;
+using Senparc.Ncf.Log;
+using Senparc.Ncf.Service;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Senparc.Areas.Admin.Domain
 {
@@ -201,14 +195,27 @@ namespace Senparc.Areas.Admin.Domain
         {
             return GetFullList(z => ids.Contains(z.Id), z => z.Id, Ncf.Core.Enums.OrderingType.Ascending, includes: includes);
         }
-
+        //TODO: 统一此处初始化方法为一个方法
         /// <summary>
-        /// 初始化
+        /// 初始化，随机生成用户名和密码
         /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="password"></param>
         /// <returns></returns>
         public AdminUserInfo Init(out string userName, out string password)
         {
             userName = null;
+            return Init(userName, out password);
+        }
+
+        /// <summary>
+        /// 初始化，随机生成密码
+        /// </summary>
+        /// <param name="userName">用户名</param>
+        /// <param name="password">密码</param>
+        /// <returns></returns>
+        public AdminUserInfo Init(string userName, out string password)
+        {
             password = null;
 
             var oldAdminUserInfo = GetObject(z => true);
