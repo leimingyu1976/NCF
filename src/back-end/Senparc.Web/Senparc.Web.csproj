@@ -36,6 +36,7 @@
 		<PackageReference Include="Senparc.Xncf.AgentsManager" Version="0.10.1-preview1" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\HSBG.BidManager\BidManager.csproj" />
 		<ProjectReference Include="..\Senparc.Areas.Admin\Senparc.Areas.Admin.csproj" />
 		<!--<ProjectReference Include="..\Senparc.Aspire.ServiceDefaults\Senparc.Aspire.ServiceDefaults.csproj" />-->
 		<!--<ProjectReference Include="..\Senparc.Xncf.Accounts\Senparc.Xncf.Accounts.csproj" />-->
