@@ -38,7 +38,7 @@ namespace BidManager
         #endregion
 
         #region IXncfRazorRuntimeCompilation 接口
-        public string LibraryPath => Path.GetFullPath(Path.Combine(SiteConfig.WebRootPath, "..", "..", "BidManager"));
+        public string LibraryPath => Path.GetFullPath(Path.Combine(SiteConfig.WebRootPath, "..", "..", "HSBG.BidManager"));
         #endregion
     }
 }
